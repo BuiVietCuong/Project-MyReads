@@ -1,7 +1,7 @@
 import "./App.css";
+import { getAll, search, update } from "./BooksAPI";
 import {ListComponent} from "./components/ListComponent";
 import Search from "./components/SearchComponent";
-import { API } from "./controller/API";
 import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -17,7 +17,7 @@ function App() {
 
   const updateBook = async (book, shelf) => {
     try {
-      await API.update(book, shelf);
+      await update(book, shelf);
       setBooks((oldBook) => {
         console.log("pre:==== ", oldBook)
         const updatedBooks = oldBook.filter((b) => b.id !== book.id);
@@ -31,8 +31,9 @@ function App() {
   const findByQuery = async (query) => {
     if (query.trim() !== "") {
       try {
-        const results = await API.findByKey(query);
-        setFindBooks(results.books);
+        const results = await search(query);
+        if (Array.isArray(results)) setFindBooks(results);
+        else setFindBooks([]);
       } catch {
         setFindBooks([]);
         console.error("Error searching for books");
@@ -47,9 +48,9 @@ function App() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const data = await API.findAll();
+        const data = await getAll();
         console.log("bbb", books)
-        setBooks(data.books);
+        setBooks(data);
       } catch {
         console.error("Error fetching books");
       }
